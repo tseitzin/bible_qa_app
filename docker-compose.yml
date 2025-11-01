@@ -1,4 +1,3 @@
-version: '3.8'
 
 services:
   db:
@@ -9,7 +8,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: bible_qa
     ports:
-      - "5432:5432"
+      - "5433:5432"  # Host port changed to avoid local 5432 conflict
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -20,7 +19,7 @@ services:
 
   backend:
     build:
-      context: ./bible_qa_fastapi
+      context: ./backend
       dockerfile: Dockerfile
     container_name: bible_qa_backend
     ports:
@@ -30,15 +29,16 @@ services:
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       ALLOWED_ORIGINS: http://localhost:5173,http://localhost:3000
       DEBUG: "true"
+      # Optionally override OPENAI_MODEL or add NEW_RELIC_LICENSE_KEY, etc.
     depends_on:
       db:
         condition: service_healthy
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
 
   frontend:
     build:
-      context: ./bible_qa_frontend
+      context: ./frontend
       dockerfile: Dockerfile
+      target: dev
     container_name: bible_qa_frontend
     ports:
       - "5173:5173"
@@ -46,7 +46,6 @@ services:
       VITE_API_URL: http://localhost:8000
     depends_on:
       - backend
-    command: npm run dev -- --host
 
 volumes:
   postgres_data:
