@@ -128,3 +128,4 @@ yarn-error.log*
 *.tmp
 
 # Add additional ignores below as tooling/framework choices solidify
+*.xlsx
