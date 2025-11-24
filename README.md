@@ -157,6 +157,7 @@ Root `.env` consumed by Docker Compose injecting:
 
 - `OPENAI_API_KEY` – Required for backend OpenAI calls
 - (Add more as needed: `ALLOWED_ORIGINS`, etc.)
+- `MCP_API_KEY` – Optional shared secret callers must send to access `/api/mcp/*`
 
 Backend-specific (can also be set in shell):
 
@@ -194,6 +195,35 @@ Response:
 ```
 
 GET `http://localhost:8000/api/history/1?limit=10`
+
+## Model Context Protocol (MCP) tools
+
+The backend now exposes an MCP server directly inside the FastAPI process so GPT-style agents can call structured Bible tools instead of relying on prompt scraping.
+
+- `GET /api/mcp/tools` – Lists every registered MCP tool (currently the Phase&nbsp;1 scripture tools: `get_verse`, `get_passage`, `get_chapter`, `search_verses`).
+- `POST /api/mcp/call` – Invokes a tool with `{ "tool": "get_verse", "arguments": { ... } }` payloads and returns `{ "result": ... }`.
+
+### Authentication
+
+Set `MCP_API_KEY=some-long-secret` in the backend environment to require callers to send `X-MCP-API-KEY` with every request. When the env var is blank (default for local dev), the endpoints are open.
+
+### Example request
+
+```bash
+curl -X POST http://localhost:8000/api/mcp/call \
+   -H "Content-Type: application/json" \
+   -d '{
+      "tool": "get_passage",
+      "arguments": {
+         "book": "John",
+         "chapter": 3,
+         "start_verse": 14,
+         "end_verse": 17
+      }
+   }'
+```
+
+The response contains the exact verses pulled from the `bible_verses` table so the LLM can cite Scripture accurately. Future phases can register user-personalization and cross-reference tools under the same `/api/mcp` umbrella.
 
 ## Alembic Migrations
 
