@@ -1,0 +1,129 @@
+name: Main App CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate-config:
+    name: Validate Configuration Files
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: false  # Don't need submodules for config validation
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install test dependencies
+        run: |
+          pip install -r requirements-test.txt
+
+      - name: Run configuration tests
+        run: |
+          pytest tests/test_configuration.py -v
+
+      - name: Validate docker-compose syntax
+        run: |
+          docker compose config > /dev/null
+
+  validate-deployment:
+    name: Validate Deployment Scripts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install test dependencies
+        run: |
+          pip install -r requirements-test.txt
+
+      - name: Run deployment script tests
+        run: |
+          pytest tests/test_deployment.py -v
+
+      - name: Validate bash syntax
+        run: |
+          bash -n deploy.sh
+
+  submodule-status:
+    name: Check Submodule Status
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install test dependencies
+        run: |
+          pip install -r requirements-test.txt
+
+      - name: Run submodule tests
+        run: |
+          pytest tests/test_submodules.py -v
+
+  docker-integration:
+    name: Docker Compose Integration Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY || 'sk-test-dummy-key-for-ci' }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install test dependencies
+        run: |
+          pip install -r requirements-test.txt
+
+      - name: Create .env file for tests
+        run: |
+          echo "OPENAI_API_KEY=${{ env.OPENAI_API_KEY }}" > .env
+
+      - name: Pull Docker images
+        run: |
+          docker compose pull
+
+      - name: Run Docker Compose integration tests
+        run: |
+          pytest tests/test_docker_compose.py -v --timeout=300
+
+      - name: Show container logs on failure
+        if: failure()
+        run: |
+          echo "=== Backend Logs ==="
+          docker compose logs backend || true
+          echo "=== Frontend Logs ==="
+          docker compose logs frontend || true
+          echo "=== Database Logs ==="
+          docker compose logs db || true
+          echo "=== Redis Logs ==="
+          docker compose logs redis || true
+
+      - name: Cleanup Docker resources
+        if: always()
+        run: |
+          docker compose down -v

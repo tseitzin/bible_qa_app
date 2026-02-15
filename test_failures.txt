@@ -1,0 +1,2767 @@
+Skip to content
+tseitzin
+bible_qa_fastapi
+Repository navigation
+Code
+Issues
+Pull requests
+Agents
+Actions
+Projects
+Wiki
+Security
+Insights
+Settings
+CI
+Added ci for the back end #1
+All jobs
+Run details
+Annotations
+1 error
+Backend Tests
+failed 2 minutes ago in 37s
+Search logs
+1s
+21s
+1s
+0s
+11s
+0s
+Run ruff check app/
+I001 [*] Import block is un-sorted or un-formatted
+  --> app/auth.py:2:1
+   |
+ 1 |   """Authentication utilities for JWT tokens and password hashing."""
+ 2 | / from datetime import datetime, timedelta, timezone
+ 3 | | from typing import Optional
+ 4 | | import inspect
+ 5 | | import secrets
+ 6 | | import uuid
+ 7 | |
+ 8 | | from fastapi import Depends, HTTPException, Request, Response, status
+ 9 | | from fastapi.security.utils import get_authorization_scheme_param
+10 | | from jose import JWTError, jwt
+11 | | from passlib.context import CryptContext
+12 | |
+13 | | from app.config import get_settings
+14 | | from app.database import get_db_connection
+15 | | from app.models.schemas import User
+16 | |
+17 | | import logging
+   | |______________^
+18 |
+19 |   logger = logging.getLogger(__name__)
+   |
+help: Organize imports
+
+F401 [*] `app.models.schemas.User` imported but unused
+  --> app/auth.py:15:32
+   |
+13 | from app.config import get_settings
+14 | from app.database import get_db_connection
+15 | from app.models.schemas import User
+   |                                ^^^^
+16 |
+17 | import logging
+   |
+help: Remove unused import: `app.models.schemas.User`
+
+W293 [*] Blank line contains whitespace
+   --> app/auth.py:205:1
+    |
+203 |     # Generate unique username using UUID
+204 |     guest_username = f"guest_{uuid.uuid4().hex[:12]}"
+205 |     
+    | ^^^^
+206 |     with get_db_connection() as conn:
+207 |         with conn.cursor() as cur:
+    |
+help: Remove whitespace from blank line
+
+W291 Trailing whitespace
+   --> app/auth.py:213:95
+    |
+211 |                                    country_code, country_name, city, region)
+212 |                 VALUES (%s, NULL, TRUE, FALSE, TRUE, %s, %s, %s, %s, %s)
+213 |                 RETURNING id, email, username, is_active, is_admin, is_guest, last_ip_address, 
+    |                                                                                               ^
+214 |                           country_code, country_name, city, region, created_at
+215 |                 """,
+    |
+help: Remove trailing whitespace
+
+W293 [*] Blank line contains whitespace
+   --> app/auth.py:224:1
+    |
+222 |             user = cur.fetchone()
+223 |             conn.commit()
+224 |             
+    | ^^^^^^^^^^^^
+225 |             # Convert to dict format
+226 |             if user:
+    |
+help: Remove whitespace from blank line
+
+W293 Blank line contains whitespace
+   --> app/auth.py:377:1
+    |
+375 | async def get_or_create_guest_user(request: Request, response: Response = None) -> dict:
+376 |     """Get authenticated user or create a guest user if not authenticated.
+377 |     
+    | ^^^^
+378 |     This ensures every request has a user associated with it for tracking purposes.
+379 |     Guest users are uniquely identified and tracked.
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/auth.py:387:1
+    |
+385 |         if user:
+386 |             return user
+387 |     
+    | ^^^^
+388 |     # Try normal auth
+389 |     user = await get_current_user_optional(request=request)
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/auth.py:392:1
+    |
+390 |     if user:
+391 |         return user
+392 |     
+    | ^^^^
+393 |     # No authenticated user - check for existing guest user in cookie
+394 |     guest_user_id = request.cookies.get(GUEST_USER_COOKIE_NAME)
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/auth.py:402:1
+    |
+400 |         except (ValueError, TypeError):
+401 |             pass  # Invalid guest user ID, create new one
+402 |     
+    | ^^^^
+403 |     # Create new guest user with geolocation
+404 |     ip_address = get_client_ip(request)
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/auth.py:405:1
+    |
+403 |     # Create new guest user with geolocation
+404 |     ip_address = get_client_ip(request)
+405 |     
+    | ^^^^
+406 |     # Try to get geolocation for the IP (sync version)
+407 |     from app.services.geolocation_service import GeolocationService
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/auth.py:409:1
+    |
+407 |     from app.services.geolocation_service import GeolocationService
+408 |     geo_data = GeolocationService.lookup_ip_sync(ip_address)
+409 |     
+    | ^^^^
+410 |     guest_user = create_guest_user(ip_address, geo_data)
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/auth.py:411:1
+    |
+410 |     guest_user = create_guest_user(ip_address, geo_data)
+411 |     
+    | ^^^^
+412 |     # Store guest user ID in cookie if response object is available
+413 |     # Note: Response object needs to be injected via dependency for cookie setting
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/auth.py:424:1
+    |
+422 |             path="/",
+423 |         )
+424 |     
+    | ^^^^
+425 |     return guest_user
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/auth.py:433:1
+    |
+431 |     if override_value[1]:
+432 |         return override_value[0]
+433 |     
+    | ^^^^
+434 |     return await get_or_create_guest_user(request)
+    |
+help: Remove whitespace from blank line
+
+I001 [*] Import block is un-sorted or un-formatted
+ --> app/config.py:2:1
+  |
+1 |   """Configuration management for the Bible Q&A API."""
+2 | / import os
+3 | | from urllib.parse import urlparse
+4 | | from functools import lru_cache
+5 | | from pydantic import Field, computed_field
+6 | | from pydantic_settings import BaseSettings, SettingsConfigDict
+  | |______________________________________________________________^
+  |
+help: Organize imports
+
+W293 [*] Blank line contains whitespace
+  --> app/config.py:11:1
+   |
+ 9 | class Settings(BaseSettings):
+10 |     """Application settings."""
+11 |     
+   | ^^^^
+12 |     # API Configuration
+13 |     app_name: str = Field(default="Bible Q&A API", env="APP_NAME")
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/config.py:15:1
+   |
+13 |     app_name: str = Field(default="Bible Q&A API", env="APP_NAME")
+14 |     debug: bool = Field(default=False, env="DEBUG")
+15 |     
+   | ^^^^
+16 |     # Database Configuration (Heroku compatible)
+17 |     database_url: str = Field(default="", env="DATABASE_URL")
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/config.py:23:1
+   |
+21 |     db_host: str = Field(default="localhost", env="DB_HOST")
+22 |     db_port: int = Field(default=5432, env="DB_PORT")
+23 |     
+   | ^^^^
+24 |     # Redis Configuration
+25 |     redis_url: str = Field(default="redis://localhost:6379/0", env="REDIS_URL")
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/config.py:30:1
+   |
+28 |     cache_ttl_questions: int = Field(default=86400, env="CACHE_TTL_QUESTIONS")  # 24 hours
+29 |     cache_ttl_searches: int = Field(default=3600, env="CACHE_TTL_SEARCHES")  # 1 hour
+30 |     
+   | ^^^^
+31 |     # OpenAI Configuration
+32 |     openai_api_key: str = Field(default="", env="OPENAI_API_KEY")
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/config.py:40:1
+   |
+38 |     openai_request_timeout: int = Field(default=45, env="OPENAI_REQUEST_TIMEOUT")  # Reduced from 60
+39 |     openai_max_history_messages: int = Field(default=10, env="OPENAI_MAX_HISTORY_MESSAGES")  # Reduced from 12
+40 |     
+   | ^^^^
+41 |     # MCP Configuration
+42 |     mcp_api_key: str = Field(default="", env="MCP_API_KEY")
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/config.py:62:1
+   |
+60 |     csrf_header_name: str = Field(default="X-CSRF-Token", env="CSRF_HEADER_NAME")
+61 |     csrf_protection_enabled: bool = Field(default=True, env="CSRF_PROTECTION_ENABLED")
+62 |     
+   | ^^^^
+63 |     # CORS Configuration
+64 |     @computed_field
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/config.py:91:1
+   |
+89 |         raw_paths = os.getenv("CSRF_EXEMPT_PATHS", "/api/auth/login,/api/auth/register,/api/auth/logout,/api/ask,/api/ask/followup,/ap…
+90 |         return [path.strip() for path in raw_paths.split(",") if path.strip()]
+91 |     
+   | ^^^^
+92 |     @property
+93 |     def db_config(self) -> dict:
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/config.py:123:1
+    |
+121 |                 'port': 5432
+122 |             }
+123 |     
+    | ^^^^
+124 |     model_config = SettingsConfigDict(
+125 |         env_file=None,  # Don't load from .env file
+    |
+help: Remove whitespace from blank line
+
+I001 [*] Import block is un-sorted or un-formatted
+   --> app/database.py:107:1
+    |
+106 |   # Backward-compatible re-exports from app.repositories
+107 | / from app.repositories.question import QuestionRepository  # noqa: E402, F401
+108 | | from app.repositories.saved_answers import SavedAnswersRepository  # noqa: E402, F401
+109 | | from app.repositories.recent_questions import RecentQuestionsRepository  # noqa: E402, F401
+110 | | from app.repositories.user_notes import UserNotesRepository  # noqa: E402, F401
+111 | | from app.repositories.cross_reference import CrossReferenceRepository  # noqa: E402, F401
+112 | | from app.repositories.lexicon import LexiconRepository  # noqa: E402, F401
+113 | | from app.repositories.topic_index import TopicIndexRepository  # noqa: E402, F401
+114 | | from app.repositories.reading_plan import ReadingPlanRepository  # noqa: E402, F401
+115 | | from app.repositories.devotional_template import DevotionalTemplateRepository  # noqa: E402, F401
+116 | | from app.repositories.user_reading_plan import UserReadingPlanRepository  # noqa: E402, F401
+117 | | from app.repositories.api_request_log import ApiRequestLogRepository  # noqa: E402, F401
+118 | | from app.repositories.openai_api_call import OpenAIApiCallRepository  # noqa: E402, F401
+119 | | from app.repositories.page_analytics import PageAnalyticsRepository  # noqa: E402, F401
+    | |___________________________________________________________________^
+    |
+help: Organize imports
+
+I001 [*] Import block is un-sorted or un-formatted
+  --> app/main.py:2:1
+   |
+ 1 |   """Bible Q&A FastAPI Application."""
+ 2 | / from contextlib import asynccontextmanager
+ 3 | | from datetime import datetime, timezone
+ 4 | | from typing import Annotated, Optional, Dict, Any
+ 5 | | from fastapi import FastAPI, HTTPException, Depends, Request, Response
+ 6 | | from fastapi.middleware.cors import CORSMiddleware
+ 7 | | from fastapi.responses import JSONResponse, StreamingResponse
+ 8 | | import json
+ 9 | | import logging
+10 | |
+11 | | from app.config import get_settings
+12 | | from app.database import initialize_connection_pool, close_connection_pool
+13 | | from app.services.cache_service import initialize_redis, close_redis
+14 | | from app.models.schemas import (
+15 | |     QuestionRequest, QuestionResponse, FollowUpQuestionRequest,
+16 | |     HistoryResponse, HealthCheck
+17 | | )
+18 | | from app.services.question_service import QuestionService
+19 | | from app.utils.exceptions import DatabaseError, OpenAIError
+20 | | from app.auth import (
+21 | |     get_current_user_dependency,
+22 | |     get_current_user_optional_dependency,
+23 | |     get_or_create_guest_user,
+24 | | )
+25 | | from app.routers import auth, saved_answers, bible, recent_questions, study_resources, user_reading_plans, admin_api_logs, admin_users…
+26 | | from app.routers.admin_content import router as admin_content_router
+27 | | from app.middleware.csrf import CSRFMiddleware
+28 | | from app.middleware.api_request_logging import ApiRequestLoggingMiddleware
+29 | | from app.mcp.router import router as mcp_router
+   | |_______________________________________________^
+30 |
+31 |   # Configure logging
+   |
+help: Organize imports
+
+I001 [*] Import block is un-sorted or un-formatted
+ --> app/mcp/__init__.py:3:1
+  |
+1 | """Model Context Protocol (MCP) integration package."""
+2 |
+3 | from .router import router, list_registered_tools  # noqa: F401
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+help: Organize imports
+
+I001 [*] Import block is un-sorted or un-formatted
+  --> app/mcp/router.py:2:1
+   |
+ 1 |   """FastAPI router exposing MCP-compatible endpoints."""
+ 2 | / from __future__ import annotations
+ 3 | |
+ 4 | | import logging
+ 5 | | from typing import Any, Optional
+ 6 | |
+ 7 | | from fastapi import APIRouter, Depends, HTTPException, Request, status
+ 8 | |
+ 9 | | from app.config import Settings, get_settings
+10 | | from app.mcp.models import (
+11 | |     MCPContext,
+12 | |     MCPInvokeRequest,
+13 | |     MCPInvokeResponse,
+14 | |     MCPListToolsResponse,
+15 | | )
+16 | | from app.mcp.tool_registry import get_tool_definition, list_tools
+17 | | from app.auth import get_current_user_optional_dependency
+18 | | from app.utils.exceptions import ValidationError
+19 | |
+20 | | # Ensure all tools register themselves with the global registry.
+21 | | from . import tools as _loaded_tools  # noqa: F401  pylint: disable=unused-import
+   | |____________________________________^
+22 |
+23 |   logger = logging.getLogger(__name__)
+   |
+help: Organize imports
+
+F401 [*] `typing.Any` imported but unused
+ --> app/mcp/router.py:5:20
+  |
+4 | import logging
+5 | from typing import Any, Optional
+  |                    ^^^
+6 |
+7 | from fastapi import APIRouter, Depends, HTTPException, Request, status
+  |
+help: Remove unused import: `typing.Any`
+
+I001 [*] Import block is un-sorted or un-formatted
+ --> app/mcp/tools/__init__.py:4:1
+  |
+3 |   # Import tool modules so they register themselves with the registry when package loads.
+4 | / from . import bible_tools  # noqa: F401
+5 | | from . import user_tools  # noqa: F401
+6 | | from . import utility_tools  # noqa: F401
+  | |___________________________^
+  |
+help: Organize imports
+
+I001 [*] Import block is un-sorted or un-formatted
+  --> app/middleware/api_request_logging.py:2:1
+   |
+ 1 |   """Middleware for logging API requests."""
+ 2 | / import json
+ 3 | | import logging
+ 4 | | import asyncio
+ 5 | | from starlette.middleware.base import BaseHTTPMiddleware
+ 6 | | from starlette.requests import Request
+ 7 | | from starlette.responses import Response
+ 8 | |
+ 9 | | from app.database import ApiRequestLogRepository
+10 | | from app.services.geolocation_service import GeolocationService
+11 | | from app.utils.network import get_client_ip
+   | |___________________________________________^
+12 |
+13 |   logger = logging.getLogger(__name__)
+   |
+help: Organize imports
+
+F401 [*] `asyncio` imported but unused
+ --> app/middleware/api_request_logging.py:4:8
+  |
+2 | import json
+3 | import logging
+4 | import asyncio
+  |        ^^^^^^^
+5 | from starlette.middleware.base import BaseHTTPMiddleware
+6 | from starlette.requests import Request
+  |
+help: Remove unused import: `asyncio`
+
+F401 [*] `starlette.responses.Response` imported but unused
+ --> app/middleware/api_request_logging.py:7:33
+  |
+5 | from starlette.middleware.base import BaseHTTPMiddleware
+6 | from starlette.requests import Request
+7 | from starlette.responses import Response
+  |                                 ^^^^^^^^
+8 |
+9 | from app.database import ApiRequestLogRepository
+  |
+help: Remove unused import: `starlette.responses.Response`
+
+W293 [*] Blank line contains whitespace
+  --> app/middleware/api_request_logging.py:18:1
+   |
+16 | class ApiRequestLoggingMiddleware(BaseHTTPMiddleware):
+17 |     """Middleware to log all API requests to the database."""
+18 |     
+   | ^^^^
+19 |     async def dispatch(self, request: Request, call_next):
+20 |         """Process the request and log it."""
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/middleware/api_request_logging.py:23:1
+   |
+21 |         # Call the next middleware/endpoint
+22 |         response = await call_next(request)
+23 |         
+   | ^^^^^^^^
+24 |         # Log the request (async, don't block response)
+25 |         try:
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/middleware/api_request_logging.py:30:1
+   |
+28 |             if hasattr(request.state, "user") and request.state.user:
+29 |                 user_id = request.state.user.get("id")
+30 |             
+   | ^^^^^^^^^^^^
+31 |             # Get client IP (handle proxy/load balancer)
+32 |             ip_address = get_client_ip(request)
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/middleware/api_request_logging.py:33:1
+   |
+31 |             # Get client IP (handle proxy/load balancer)
+32 |             ip_address = get_client_ip(request)
+33 |             
+   | ^^^^^^^^^^^^
+34 |             # Lookup geolocation for the IP (async, don't block)
+35 |             geolocation = None
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/middleware/api_request_logging.py:41:1
+   |
+39 |                 except Exception as geo_error:
+40 |                     logger.debug(f"Geolocation lookup failed: {geo_error}")
+41 |             
+   | ^^^^^^^^^^^^
+42 |             # Get payload summary for POST/PUT/PATCH requests
+43 |             payload_summary = None
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/middleware/api_request_logging.py:52:1
+   |
+50 |                 except Exception:
+51 |                     pass
+52 |             
+   | ^^^^^^^^^^^^
+53 |             # Log to database
+54 |             ApiRequestLogRepository.log_request(
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/middleware/api_request_logging.py:68:1
+   |
+66 |             # Don't break the app if logging fails
+67 |             logger.error(f"Failed to log API request: {e}")
+68 |         
+   | ^^^^^^^^
+69 |         return response
+   |
+help: Remove whitespace from blank line
+
+I001 [*] Import block is un-sorted or un-formatted
+ --> app/models/schemas.py:2:1
+  |
+1 |   """Pydantic models for request/response schemas."""
+2 | / from datetime import datetime
+3 | | from pydantic import BaseModel, Field, EmailStr
+4 | | from typing import Optional, List, Dict, Any
+  | |____________________________________________^
+  |
+help: Organize imports
+
+W293 [*] Blank line contains whitespace
+   --> app/models/schemas.py:144:1
+    |
+142 |     parent_question_id: Optional[int] = None
+143 |     conversation_thread: List[ThreadItem] = Field(default_factory=list)
+144 |     
+    | ^^^^
+145 |     class Config:
+146 |         from_attributes = True
+    |
+help: Remove whitespace from blank line
+
+I001 [*] Import block is un-sorted or un-formatted
+  --> app/repositories/__init__.py:5:1
+   |
+ 3 |   All repository classes are re-exported here for convenient imports.
+ 4 |   """
+ 5 | / from app.repositories.question import QuestionRepository
+ 6 | | from app.repositories.saved_answers import SavedAnswersRepository
+ 7 | | from app.repositories.recent_questions import RecentQuestionsRepository
+ 8 | | from app.repositories.user_notes import UserNotesRepository
+ 9 | | from app.repositories.cross_reference import CrossReferenceRepository
+10 | | from app.repositories.lexicon import LexiconRepository
+11 | | from app.repositories.topic_index import TopicIndexRepository
+12 | | from app.repositories.reading_plan import ReadingPlanRepository
+13 | | from app.repositories.devotional_template import DevotionalTemplateRepository
+14 | | from app.repositories.user_reading_plan import UserReadingPlanRepository
+15 | | from app.repositories.api_request_log import ApiRequestLogRepository
+16 | | from app.repositories.openai_api_call import OpenAIApiCallRepository
+17 | | from app.repositories.page_analytics import PageAnalyticsRepository
+   | |___________________________________________________________________^
+18 |
+19 |   __all__ = [
+   |
+help: Organize imports
+
+F401 [*] `typing.Dict` imported but unused
+ --> app/repositories/reading_plan.py:3:25
+  |
+1 | """Repository backing curated reading plans."""
+2 | import json
+3 | from typing import Any, Dict, List, Optional
+  |                         ^^^^
+4 |
+5 | from app.database import get_db_connection
+  |
+help: Remove unused import: `typing.Dict`
+
+I001 [*] Import block is un-sorted or un-formatted
+ --> app/routers/admin_api_logs.py:2:1
+  |
+1 |   """Admin API endpoints for viewing API request logs."""
+2 | / from typing import Optional
+3 | | from fastapi import APIRouter, Depends, HTTPException, Query
+4 | | from pydantic import BaseModel
+5 | |
+6 | | from app.auth import get_current_admin_user
+7 | | from app.database import ApiRequestLogRepository, OpenAIApiCallRepository
+  | |_________________________________________________________________________^
+  |
+help: Organize imports
+
+I001 [*] Import block is un-sorted or un-formatted
+ --> app/routers/admin_content.py:2:1
+  |
+1 |   """Admin endpoints for managing questions and saved answers."""
+2 | / import logging
+3 | | from fastapi import APIRouter, Depends, HTTPException
+4 | |
+5 | | from app.auth import get_current_admin_user
+6 | | from app.database import QuestionRepository, SavedAnswersRepository
+  | |___________________________________________________________________^
+7 |
+8 |   logger = logging.getLogger(__name__)
+  |
+help: Organize imports
+
+I001 [*] Import block is un-sorted or un-formatted
+  --> app/routers/admin_users.py:2:1
+   |
+ 1 |   """Admin endpoints for user management."""
+ 2 | / from fastapi import APIRouter, Depends, HTTPException, Query, status
+ 3 | | from typing import List, Optional
+ 4 | | from pydantic import BaseModel
+ 5 | |
+ 6 | | from app.auth import get_current_admin_user
+ 7 | | from app.database import get_db_connection
+ 8 | |
+ 9 | | import logging
+   | |______________^
+10 |
+11 |   logger = logging.getLogger(__name__)
+   |
+help: Organize imports
+
+F401 [*] `fastapi.status` imported but unused
+ --> app/routers/admin_users.py:2:63
+  |
+1 | """Admin endpoints for user management."""
+2 | from fastapi import APIRouter, Depends, HTTPException, Query, status
+  |                                                               ^^^^^^
+3 | from typing import List, Optional
+4 | from pydantic import BaseModel
+  |
+help: Remove unused import: `fastapi.status`
+
+W291 Trailing whitespace
+  --> app/routers/admin_users.py:78:27
+   |
+76 |                 query_parts = [
+77 |                     """
+78 |                     SELECT 
+   |                           ^
+79 |                         u.id,
+80 |                         u.email,
+   |
+help: Remove trailing whitespace
+
+W293 [*] Blank line contains whitespace
+   --> app/routers/admin_users.py:102:1
+    |
+100 |                 ]
+101 |                 params = []
+102 |                 
+    | ^^^^^^^^^^^^^^^^
+103 |                 if search:
+104 |                     query_parts.append("AND (u.email ILIKE %s OR u.username ILIKE %s)")
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/routers/admin_users.py:107:1
+    |
+105 |                     search_pattern = f"%{search}%"
+106 |                     params.extend([search_pattern, search_pattern])
+107 |                 
+    | ^^^^^^^^^^^^^^^^
+108 |                 if active_only:
+109 |                     query_parts.append("AND u.is_active = true")
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/routers/admin_users.py:110:1
+    |
+108 | …     if active_only:
+109 | …         query_parts.append("AND u.is_active = true")
+110 | …     
+^^^^^^^^^^^^
+111 | …     query_parts.append("GROUP BY u.id, u.email, u.username, u.is_active, u.is_admin, u.is_guest, u.last_ip_address, u.country_code,…
+112 | …     query_parts.append("ORDER BY u.created_at DESC")
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/routers/admin_users.py:115:1
+    |
+113 |                 query_parts.append("LIMIT %s OFFSET %s")
+114 |                 params.extend([limit, offset])
+115 |                 
+    | ^^^^^^^^^^^^^^^^
+116 |                 cur.execute(" ".join(query_parts), params)
+117 |                 users = cur.fetchall()
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/routers/admin_users.py:118:1
+    |
+116 |                 cur.execute(" ".join(query_parts), params)
+117 |                 users = cur.fetchall()
+118 |                 
+    | ^^^^^^^^^^^^^^^^
+119 |                 return [
+120 |                     UserListItem(
+    |
+help: Remove whitespace from blank line
+
+W291 Trailing whitespace
+   --> app/routers/admin_users.py:151:27
+    |
+149 |             with conn.cursor() as cur:
+150 |                 cur.execute("""
+151 |                     SELECT 
+    |                           ^
+152 |                         COUNT(*) as total_users,
+153 |                         COUNT(*) FILTER (WHERE is_active = true) as active_users,
+    |
+help: Remove trailing whitespace
+
+W293 [*] Blank line contains whitespace
+   --> app/routers/admin_users.py:159:1
+    |
+157 |                 """)
+158 |                 stats = cur.fetchone()
+159 |                 
+    | ^^^^^^^^^^^^^^^^
+160 |                 # Get users with questions separately
+161 |                 cur.execute("""
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/routers/admin_users.py:166:1
+    |
+164 |                 """)
+165 |                 question_stats = cur.fetchone()
+166 |                 
+    | ^^^^^^^^^^^^^^^^
+167 |                 return UserStats(
+168 |                     total_users=stats["total_users"] or 0,
+    |
+help: Remove whitespace from blank line
+
+W291 Trailing whitespace
+   --> app/routers/admin_users.py:189:27
+    |
+187 |             with conn.cursor() as cur:
+188 |                 cur.execute("""
+189 |                     SELECT 
+    |                           ^
+190 |                         u.id,
+191 |                         u.email,
+    |
+help: Remove trailing whitespace
+
+W293 [*] Blank line contains whitespace
+   --> app/routers/admin_users.py:214:1
+    |
+212 | …         GROUP BY u.id, u.email, u.username, u.is_active, u.is_admin, u.is_guest, u.last_ip_address, u.country_code, u.country_name,…
+213 | …     """, (user_id,))
+214 | …     
+^^^^^^^^^^^^
+215 | …     user = cur.fetchone()
+216 | …     if not user:
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/routers/admin_users.py:218:1
+    |
+216 |                 if not user:
+217 |                     raise HTTPException(status_code=404, detail="User not found")
+218 |                 
+    | ^^^^^^^^^^^^^^^^
+219 |                 return UserDetail(
+220 |                     id=user["id"],
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/routers/admin_users.py:257:1
+    |
+255 |                 if not cur.fetchone():
+256 |                     raise HTTPException(status_code=404, detail="User not found")
+257 |                 
+    | ^^^^^^^^^^^^^^^^
+258 |                 # Delete all user data (cascading deletes will handle related records)
+259 |                 # Questions table has ON DELETE CASCADE, so answers will be deleted too
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/routers/admin_users.py:262:1
+    |
+260 |                 cur.execute("DELETE FROM questions WHERE user_id = %s", (user_id,))
+261 |                 deleted_questions = cur.rowcount
+262 |                 
+    | ^^^^^^^^^^^^^^^^
+263 |                 # Delete saved answers (already cascaded, but explicit for clarity)
+264 |                 cur.execute("DELETE FROM saved_answers WHERE user_id = %s", (user_id,))
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/routers/admin_users.py:266:1
+    |
+264 |                 cur.execute("DELETE FROM saved_answers WHERE user_id = %s", (user_id,))
+265 |                 deleted_saved = cur.rowcount
+266 |                 
+    | ^^^^^^^^^^^^^^^^
+267 |                 # Delete recent questions
+268 |                 cur.execute("DELETE FROM recent_questions WHERE user_id = %s", (user_id,))
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/routers/admin_users.py:270:1
+    |
+268 |                 cur.execute("DELETE FROM recent_questions WHERE user_id = %s", (user_id,))
+269 |                 deleted_recent = cur.rowcount
+270 |                 
+    | ^^^^^^^^^^^^^^^^
+271 |                 # Delete user notes
+272 |                 cur.execute("DELETE FROM user_notes WHERE user_id = %s", (user_id,))
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/routers/admin_users.py:274:1
+    |
+272 | …     cur.execute("DELETE FROM user_notes WHERE user_id = %s", (user_id,))
+273 | …     deleted_notes = cur.rowcount
+274 | …     
+^^^^^^^^^^^^
+275 | …     # Delete user reading plan progress
+276 | …     cur.execute("DELETE FROM user_reading_plan_days WHERE user_id IN (SELECT id FROM user_reading_plans WHERE user_id = %s)", (user…
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/routers/admin_users.py:279:1
+    |
+277 |                 cur.execute("DELETE FROM user_reading_plans WHERE user_id = %s", (user_id,))
+278 |                 deleted_plans = cur.rowcount
+279 |                 
+    | ^^^^^^^^^^^^^^^^
+280 |                 conn.commit()
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/routers/admin_users.py:281:1
+    |
+280 |                 conn.commit()
+281 |                 
+    | ^^^^^^^^^^^^^^^^
+282 |                 logger.info(f"Admin {current_admin['id']} reset account for user {user_id}")
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/routers/admin_users.py:283:1
+    |
+282 |                 logger.info(f"Admin {current_admin['id']} reset account for user {user_id}")
+283 |                 
+    | ^^^^^^^^^^^^^^^^
+284 |                 return {
+285 |                     "status": "success",
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/routers/admin_users.py:315:1
+    |
+313 |                 if not cur.fetchone():
+314 |                     raise HTTPException(status_code=404, detail="User not found")
+315 |                 
+    | ^^^^^^^^^^^^^^^^
+316 |                 cur.execute("DELETE FROM saved_answers WHERE user_id = %s", (user_id,))
+317 |                 deleted_count = cur.rowcount
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/routers/admin_users.py:319:1
+    |
+317 |                 deleted_count = cur.rowcount
+318 |                 conn.commit()
+319 |                 
+    | ^^^^^^^^^^^^^^^^
+320 |                 logger.info(f"Admin {current_admin['id']} cleared {deleted_count} saved answers for user {user_id}")
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/routers/admin_users.py:321:1
+    |
+320 |                 logger.info(f"Admin {current_admin['id']} cleared {deleted_count} saved answers for user {user_id}")
+321 |                 
+    | ^^^^^^^^^^^^^^^^
+322 |                 return {
+323 |                     "status": "success",
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/routers/admin_users.py:346:1
+    |
+344 |                 cur.execute("SELECT is_active FROM users WHERE id = %s", (user_id,))
+345 |                 user = cur.fetchone()
+346 |                 
+    | ^^^^^^^^^^^^^^^^
+347 |                 if not user:
+348 |                     raise HTTPException(status_code=404, detail="User not found")
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/routers/admin_users.py:349:1
+    |
+347 |                 if not user:
+348 |                     raise HTTPException(status_code=404, detail="User not found")
+349 |                 
+    | ^^^^^^^^^^^^^^^^
+350 |                 # Don't allow disabling the current admin
+351 |                 if user_id == current_admin["id"]:
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/routers/admin_users.py:353:1
+    |
+351 |                 if user_id == current_admin["id"]:
+352 |                     raise HTTPException(status_code=400, detail="Cannot disable your own account")
+353 |                 
+    | ^^^^^^^^^^^^^^^^
+354 |                 new_status = not user["is_active"]
+355 |                 cur.execute("UPDATE users SET is_active = %s WHERE id = %s", (new_status, user_id))
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/routers/admin_users.py:357:1
+    |
+355 |                 cur.execute("UPDATE users SET is_active = %s WHERE id = %s", (new_status, user_id))
+356 |                 conn.commit()
+357 |                 
+    | ^^^^^^^^^^^^^^^^
+358 |                 action = "activated" if new_status else "deactivated"
+359 |                 logger.info(f"Admin {current_admin['id']} {action} user {user_id}")
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/routers/admin_users.py:360:1
+    |
+358 |                 action = "activated" if new_status else "deactivated"
+359 |                 logger.info(f"Admin {current_admin['id']} {action} user {user_id}")
+360 |                 
+    | ^^^^^^^^^^^^^^^^
+361 |                 return {
+362 |                     "status": "success",
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/routers/admin_users.py:385:1
+    |
+383 |                 cur.execute("SELECT id, email FROM users WHERE id = %s", (user_id,))
+384 |                 user = cur.fetchone()
+385 |                 
+    | ^^^^^^^^^^^^^^^^
+386 |                 if not user:
+387 |                     raise HTTPException(status_code=404, detail="User not found")
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/routers/admin_users.py:388:1
+    |
+386 |                 if not user:
+387 |                     raise HTTPException(status_code=404, detail="User not found")
+388 |                 
+    | ^^^^^^^^^^^^^^^^
+389 |                 # Don't allow deleting yourself
+390 |                 if user_id == current_admin["id"]:
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/routers/admin_users.py:392:1
+    |
+390 |                 if user_id == current_admin["id"]:
+391 |                     raise HTTPException(status_code=400, detail="Cannot delete your own account")
+392 |                 
+    | ^^^^^^^^^^^^^^^^
+393 |                 # Delete user (cascade will handle all related data)
+394 |                 cur.execute("DELETE FROM users WHERE id = %s", (user_id,))
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/routers/admin_users.py:396:1
+    |
+394 |                 cur.execute("DELETE FROM users WHERE id = %s", (user_id,))
+395 |                 conn.commit()
+396 |                 
+    | ^^^^^^^^^^^^^^^^
+397 |                 logger.warning(f"Admin {current_admin['id']} permanently deleted user {user_id} ({user['email']})")
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/routers/admin_users.py:398:1
+    |
+397 |                 logger.warning(f"Admin {current_admin['id']} permanently deleted user {user_id} ({user['email']})")
+398 |                 
+    | ^^^^^^^^^^^^^^^^
+399 |                 return {
+400 |                     "status": "success",
+    |
+help: Remove whitespace from blank line
+
+W291 Trailing whitespace
+   --> app/routers/admin_users.py:420:40
+    |
+418 |                 # Find guest users (no email, not user_id=1)
+419 |                 cur.execute("""
+420 |                     SELECT id, username 
+    |                                        ^
+421 |                     FROM users 
+422 |                     WHERE (email IS NULL OR email = '') 
+    |
+help: Remove trailing whitespace
+
+W291 Trailing whitespace
+   --> app/routers/admin_users.py:421:31
+    |
+419 |                 cur.execute("""
+420 |                     SELECT id, username 
+421 |                     FROM users 
+    |                               ^
+422 |                     WHERE (email IS NULL OR email = '') 
+423 |                     AND id != 1
+    |
+help: Remove trailing whitespace
+
+W291 Trailing whitespace
+   --> app/routers/admin_users.py:422:56
+    |
+420 |                     SELECT id, username 
+421 |                     FROM users 
+422 |                     WHERE (email IS NULL OR email = '') 
+    |                                                        ^
+423 |                     AND id != 1
+424 |                     ORDER BY id
+    |
+help: Remove trailing whitespace
+
+W293 [*] Blank line contains whitespace
+   --> app/routers/admin_users.py:427:1
+    |
+425 |                 """)
+426 |                 guest_users = cur.fetchall()
+427 |                 
+    | ^^^^^^^^^^^^^^^^
+428 |                 if not guest_users:
+429 |                     return {
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/routers/admin_users.py:434:1
+    |
+432 |                         "deleted_count": 0,
+433 |                     }
+434 |                 
+    | ^^^^^^^^^^^^^^^^
+435 |                 # Delete all guest users except user_id=1
+436 |                 cur.execute("""
+    |
+help: Remove whitespace from blank line
+
+W291 Trailing whitespace
+   --> app/routers/admin_users.py:437:38
+    |
+435 |                 # Delete all guest users except user_id=1
+436 |                 cur.execute("""
+437 |                     DELETE FROM users 
+    |                                      ^
+438 |                     WHERE (email IS NULL OR email = '') 
+439 |                     AND id != 1
+    |
+help: Remove trailing whitespace
+
+W291 Trailing whitespace
+   --> app/routers/admin_users.py:438:56
+    |
+436 |                 cur.execute("""
+437 |                     DELETE FROM users 
+438 |                     WHERE (email IS NULL OR email = '') 
+    |                                                        ^
+439 |                     AND id != 1
+440 |                 """)
+    |
+help: Remove trailing whitespace
+
+W293 [*] Blank line contains whitespace
+   --> app/routers/admin_users.py:443:1
+    |
+441 |                 deleted_count = cur.rowcount
+442 |                 conn.commit()
+443 |                 
+    | ^^^^^^^^^^^^^^^^
+444 |                 logger.info(f"Admin {current_admin['id']} cleaned up {deleted_count} guest users")
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/routers/admin_users.py:445:1
+    |
+444 |                 logger.info(f"Admin {current_admin['id']} cleaned up {deleted_count} guest users")
+445 |                 
+    | ^^^^^^^^^^^^^^^^
+446 |                 return {
+447 |                     "status": "success",
+    |
+help: Remove whitespace from blank line
+
+I001 [*] Import block is un-sorted or un-formatted
+  --> app/routers/auth.py:2:1
+   |
+ 1 |   """Authentication routes for user registration and login."""
+ 2 | / from fastapi import APIRouter, HTTPException, Request, Response, status
+ 3 | | from app.models.schemas import UserCreate, UserLogin, User
+ 4 | | from app.auth import (
+ 5 | |     create_user,
+ 6 | |     get_user_by_email,
+ 7 | |     verify_password,
+ 8 | |     create_access_token,
+ 9 | |     get_current_user,
+10 | |     set_auth_cookie,
+11 | |     clear_auth_cookie,
+12 | |     get_user_by_id,
+13 | |     generate_csrf_token,
+14 | |     set_csrf_cookie,
+15 | |     clear_csrf_cookie,
+16 | |     get_client_ip,
+17 | |     update_user_ip_address,
+18 | | )
+19 | | from app.config import get_settings
+20 | | import logging
+21 | | from psycopg2 import IntegrityError
+   | |___________________________________^
+22 |
+23 |   logger = logging.getLogger(__name__)
+   |
+help: Organize imports
+
+W293 [*] Blank line contains whitespace
+  --> app/routers/auth.py:40:1
+   |
+38 |                 detail="Email already registered"
+39 |             )
+40 |         
+   | ^^^^^^^^
+41 |         # Get client IP for tracking
+42 |         ip_address = get_client_ip(request)
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/routers/auth.py:43:1
+   |
+41 |         # Get client IP for tracking
+42 |         ip_address = get_client_ip(request)
+43 |         
+   | ^^^^^^^^
+44 |         # Create new user
+45 |         user = create_user(
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/routers/auth.py:51:1
+   |
+49 |             ip_address=ip_address
+50 |         )
+51 |         
+   | ^^^^^^^^
+52 |         logger.info(f"New user registered: {user['email']}")
+53 |         return User.model_validate(user).model_dump()
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/routers/auth.py:54:1
+   |
+52 |         logger.info(f"New user registered: {user['email']}")
+53 |         return User.model_validate(user).model_dump()
+54 |     
+   | ^^^^
+55 |     except HTTPException:
+56 |         raise
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/routers/auth.py:74:1
+   |
+72 |     """Authenticate user and establish a session via secure cookie."""
+73 |     user = get_user_by_email(credentials.email)
+74 |     
+   | ^^^^
+75 |     if not user or not verify_password(credentials.password, user["hashed_password"]):
+76 |         raise HTTPException(
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/routers/auth.py:81:1
+   |
+79 |             headers={"WWW-Authenticate": "Bearer"},
+80 |         )
+81 |     
+   | ^^^^
+82 |     if not user["is_active"]:
+83 |         raise HTTPException(
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/routers/auth.py:87:1
+   |
+85 |             detail="Inactive user account"
+86 |         )
+87 |     
+   | ^^^^
+88 |     # Update user's last IP address
+89 |     ip_address = get_client_ip(request)
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/routers/auth.py:91:1
+   |
+89 |     ip_address = get_client_ip(request)
+90 |     update_user_ip_address(user["id"], ip_address)
+91 |     
+   | ^^^^
+92 |     # Create access token
+93 |     access_token = create_access_token(data={"sub": str(user["id"])})
+   |
+help: Remove whitespace from blank line
+
+I001 [*] Import block is un-sorted or un-formatted
+ --> app/routers/bible.py:2:1
+  |
+1 |   """API routes for Bible verse retrieval."""
+2 | / from fastapi import APIRouter, Depends, HTTPException, Query, status
+3 | |
+4 | | from app.models.schemas import BibleVerseResponse, BiblePassageResponse
+5 | | from app.services.bible_service import BibleService, get_bible_service
+6 | | from app.utils.exceptions import ValidationError
+  | |________________________________________________^
+7 |
+8 |   router = APIRouter(prefix="/api", tags=["bible"])
+  |
+help: Organize imports
+
+I001 [*] Import block is un-sorted or un-formatted
+  --> app/routers/page_analytics.py:2:1
+   |
+ 1 |   """Page analytics router for tracking user behavior."""
+ 2 | / import logging
+ 3 | | from typing import Optional
+ 4 | | from fastapi import APIRouter, Depends, HTTPException, Request
+ 5 | |
+ 6 | | from app.database import PageAnalyticsRepository
+ 7 | | from app.auth import get_current_user_optional_dependency, get_current_admin_user
+ 8 | | from app.models.schemas import PageViewRequest, PageMetricsUpdate, ClickEventRequest
+ 9 | | from app.services.geolocation_service import GeolocationService
+10 | | from app.utils.network import get_client_ip
+   | |___________________________________________^
+11 |
+12 |   logger = logging.getLogger(__name__)
+   |
+help: Organize imports
+
+W293 [*] Blank line contains whitespace
+  --> app/routers/page_analytics.py:27:1
+   |
+25 |         # Get user ID if authenticated
+26 |         user_id = current_user.get("id") if current_user else None
+27 |         
+   | ^^^^^^^^
+28 |         # Get client IP
+29 |         ip_address = get_client_ip(request)
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/routers/page_analytics.py:30:1
+   |
+28 |         # Get client IP
+29 |         ip_address = get_client_ip(request)
+30 |         
+   | ^^^^^^^^
+31 |         # Get user agent
+32 |         user_agent = request.headers.get("user-agent")
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/routers/page_analytics.py:33:1
+   |
+31 |         # Get user agent
+32 |         user_agent = request.headers.get("user-agent")
+33 |         
+   | ^^^^^^^^
+34 |         # Lookup geolocation
+35 |         geolocation = None
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/routers/page_analytics.py:41:1
+   |
+39 |             except Exception as geo_error:
+40 |                 logger.debug(f"Geolocation lookup failed: {geo_error}")
+41 |         
+   | ^^^^^^^^
+42 |         # Log to database
+43 |         page_analytics_id = PageAnalyticsRepository.log_page_view(
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/routers/page_analytics.py:55:1
+   |
+53 |             city=geolocation.get('city') if geolocation else None,
+54 |         )
+55 |         
+   | ^^^^^^^^
+56 |         return {"success": True, "page_analytics_id": page_analytics_id}
+57 |     except Exception as e:
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/routers/page_analytics.py:86:1
+   |
+84 |         # Get user ID if authenticated
+85 |         user_id = current_user.get("id") if current_user else None
+86 |         
+   | ^^^^^^^^
+87 |         # Log to database
+88 |         click_event_id = PageAnalyticsRepository.log_click_event(
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/routers/page_analytics.py:100:1
+    |
+ 98 |             click_position_y=click_event.click_position_y,
+ 99 |         )
+100 |         
+    | ^^^^^^^^
+101 |         return {"success": True, "click_event_id": click_event_id}
+102 |     except Exception as e:
+    |
+help: Remove whitespace from blank line
+
+I001 [*] Import block is un-sorted or un-formatted
+  --> app/routers/recent_questions.py:2:1
+   |
+ 1 |   """Endpoints for managing a user's recent questions list."""
+ 2 | / from fastapi import APIRouter, Depends, HTTPException, status
+ 3 | | from typing import Annotated
+ 4 | |
+ 5 | | from app.auth import get_current_user_dependency
+ 6 | | from app.database import RecentQuestionsRepository
+ 7 | | from app.models.schemas import (
+ 8 | |     RecentQuestionCreate,
+ 9 | |     RecentQuestionItem,
+10 | |     RecentQuestionsResponse,
+11 | | )
+   | |_^
+   |
+help: Organize imports
+
+I001 [*] Import block is un-sorted or un-formatted
+ --> app/routers/saved_answers.py:2:1
+  |
+1 |   """Saved answers routes for managing user's saved Q&A."""
+2 | / from fastapi import APIRouter, HTTPException, status, Depends, Query
+3 | | from typing import Annotated, Optional
+4 | | from app.models.schemas import SavedAnswerCreate, SavedAnswerResponse, SavedAnswersListResponse
+5 | | from app.database import SavedAnswersRepository
+6 | | from app.auth import get_current_user_dependency
+7 | | import logging
+  | |______________^
+8 |
+9 |   logger = logging.getLogger(__name__)
+  |
+help: Organize imports
+
+F841 Local variable `result` is assigned to but never used
+  --> app/routers/saved_answers.py:23:9
+   |
+21 |     """Save an answer to user's collection."""
+22 |     try:
+23 |         result = SavedAnswersRepository.save_answer(
+   |         ^^^^^^
+24 |             user_id=current_user["id"],
+25 |             question_id=data.question_id,
+   |
+help: Remove assignment to unused variable `result`
+
+W293 [*] Blank line contains whitespace
+  --> app/routers/saved_answers.py:28:1
+   |
+26 |             tags=data.tags
+27 |         )
+28 |         
+   | ^^^^^^^^
+29 |         # Fetch the complete saved answer details
+30 |         saved_answers = SavedAnswersRepository.get_user_saved_answers(
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/routers/saved_answers.py:34:1
+   |
+32 |             limit=1
+33 |         )
+34 |         
+   | ^^^^^^^^
+35 |         if not saved_answers:
+36 |             raise HTTPException(
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/routers/saved_answers.py:40:1
+   |
+38 |                 detail="Failed to retrieve saved answer"
+39 |             )
+40 |         
+   | ^^^^^^^^
+41 |         logger.info(f"User {current_user['id']} saved answer for question {data.question_id}")
+42 |         return saved_answers[0]
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/routers/saved_answers.py:43:1
+   |
+41 |         logger.info(f"User {current_user['id']} saved answer for question {data.question_id}")
+42 |         return saved_answers[0]
+43 |     
+   | ^^^^
+44 |     except Exception as e:
+45 |         logger.error(f"Error saving answer: {e}")
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/routers/saved_answers.py:72:1
+   |
+70 |                 limit=limit
+71 |             )
+72 |         
+   | ^^^^^^^^
+73 |         return {
+74 |             "saved_answers": saved_answers,
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/routers/saved_answers.py:77:1
+   |
+75 |             "total": len(saved_answers)
+76 |         }
+77 |     
+   | ^^^^
+78 |     except Exception as e:
+79 |         logger.error(f"Error retrieving saved answers: {e}")
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/routers/saved_answers.py:97:1
+   |
+95 |             saved_answer_id=saved_answer_id
+96 |         )
+97 |         
+   | ^^^^^^^^
+98 |         if not deleted:
+99 |             raise HTTPException(
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/routers/saved_answers.py:103:1
+    |
+101 |                 detail="Saved answer not found"
+102 |             )
+103 |         
+    | ^^^^^^^^
+104 |         logger.info(f"User {current_user['id']} deleted saved answer {saved_answer_id}")
+105 |         return None
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/routers/saved_answers.py:106:1
+    |
+104 |         logger.info(f"User {current_user['id']} deleted saved answer {saved_answer_id}")
+105 |         return None
+106 |     
+    | ^^^^
+107 |     except HTTPException:
+108 |         raise
+    |
+help: Remove whitespace from blank line
+
+I001 [*] Import block is un-sorted or un-formatted
+  --> app/routers/study_resources.py:2:1
+   |
+ 1 |   """API routes for study resource utilities (cross references, topics, plans, devotionals)."""
+ 2 | / from fastapi import APIRouter, Depends, Query
+ 3 | | from typing import List
+ 4 | |
+ 5 | | from app.models.schemas import (
+ 6 | |     CrossReferenceResponse,
+ 7 | |     TopicSearchResponse,
+ 8 | |     ReadingPlanMeta,
+ 9 | |     ReadingPlanDetailResponse,
+10 | |     DevotionalTemplate,
+11 | |     DevotionalRequest,
+12 | |     GeneratedDevotionalResponse,
+13 | | )
+14 | | from app.services.study_resource_service import StudyResourceService, get_study_resource_service
+   | |________________________________________________________________________________________________^
+15 |
+16 |   router = APIRouter(prefix="/api/study", tags=["study"])
+   |
+help: Organize imports
+
+I001 [*] Import block is un-sorted or un-formatted
+  --> app/routers/user_reading_plans.py:2:1
+   |
+ 1 |   """Routes for managing user-specific reading plan progress."""
+ 2 | / from typing import List
+ 3 | |
+ 4 | | from fastapi import APIRouter, Depends, Path, Response
+ 5 | |
+ 6 | | from app.auth import get_current_user_dependency
+ 7 | | from app.models.schemas import (
+ 8 | |     UserReadingPlanCreate,
+ 9 | |     UserReadingPlanSummary,
+10 | |     UserReadingPlanDetailResponse,
+11 | |     ReadingPlanDayCompletionUpdate,
+12 | |     ReadingPlanDayCompletionStatus,
+13 | | )
+14 | | from app.services.reading_plan_tracking_service import (
+15 | |     ReadingPlanTrackingService,
+16 | |     get_reading_plan_tracking_service,
+17 | | )
+   | |_^
+18 |
+19 |   router = APIRouter(prefix="/api/user-reading-plans", tags=["reading-plan-tracking"])
+   |
+help: Organize imports
+
+W293 [*] Blank line contains whitespace
+   --> app/services/bible_service.py:310:1
+    |
+308 |             LOGGER.debug(f"Cache hit for verse: {reference}")
+309 |             return cached
+310 |         
+    | ^^^^^^^^
+311 |         book, chapter, verse = self._parse_reference(reference)
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/services/bible_service.py:343:1
+    |
+341 |             "text": result["text"],
+342 |         }
+343 |         
+    | ^^^^^^^^
+344 |         # Cache the result
+345 |         CacheService.set_verse(reference, verse_data)
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/services/bible_service.py:346:1
+    |
+344 |         # Cache the result
+345 |         CacheService.set_verse(reference, verse_data)
+346 |         
+    | ^^^^^^^^
+347 |         return verse_data
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/services/bible_service.py:356:1
+    |
+354 |             LOGGER.debug(f"Cache hit for passage: {book} {chapter}:{start_verse}-{end_verse}")
+355 |             return cached
+356 |         
+    | ^^^^^^^^
+357 |         canonical_book = self._normalize_book_name(book)
+358 |         chapter_num = self._validate_positive_int(chapter, "chapter")
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/services/bible_service.py:401:1
+    |
+399 |             for row in rows
+400 |         ]
+401 |         
+    | ^^^^^^^^
+402 |         # Cache the result
+403 |         CacheService.set_passage(book, chapter, start_verse, end_verse, passage_data)
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/services/bible_service.py:404:1
+    |
+402 |         # Cache the result
+403 |         CacheService.set_passage(book, chapter, start_verse, end_verse, passage_data)
+404 |         
+    | ^^^^^^^^
+405 |         return passage_data
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/services/bible_service.py:482:1
+    |
+480 |             LOGGER.debug(f"Cache hit for chapter: {book} {chapter}")
+481 |             return cached
+482 |         
+    | ^^^^^^^^
+483 |         canonical_book = self._normalize_book_name(book)
+484 |         chapter_num = self._validate_positive_int(chapter, "chapter")
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/services/bible_service.py:515:1
+    |
+513 |             ],
+514 |         }
+515 |         
+    | ^^^^^^^^
+516 |         # Cache the result
+517 |         CacheService.set_chapter(book, chapter, chapter_data)
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/services/bible_service.py:518:1
+    |
+516 |         # Cache the result
+517 |         CacheService.set_chapter(book, chapter, chapter_data)
+518 |         
+    | ^^^^^^^^
+519 |         return chapter_data
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/services/bible_service.py:531:1
+    |
+529 |             LOGGER.debug(f"Cache hit for search: {keyword} (limit={limit})")
+530 |             return cached
+531 |         
+    | ^^^^^^^^
+532 |         limit_value = self._validate_positive_int(limit, "limit")
+533 |         limit_value = min(limit_value, 500)
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/services/bible_service.py:564:1
+    |
+562 |             for row in matches
+563 |         ]
+564 |         
+    | ^^^^^^^^
+565 |         # Cache the results
+566 |         CacheService.set_search(keyword, limit, results)
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/services/bible_service.py:567:1
+    |
+565 |         # Cache the results
+566 |         CacheService.set_search(keyword, limit, results)
+567 |         
+    | ^^^^^^^^
+568 |         return results
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/services/cache_service.py:22:1
+   |
+20 |     """Initialize the Redis client."""
+21 |     global _redis_client
+22 |     
+   | ^^^^
+23 |     if _redis_client is not None:
+24 |         logger.warning("Redis client already initialized")
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/services/cache_service.py:26:1
+   |
+24 |         logger.warning("Redis client already initialized")
+25 |         return
+26 |     
+   | ^^^^
+27 |     settings = get_settings()
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/services/cache_service.py:28:1
+   |
+27 |     settings = get_settings()
+28 |     
+   | ^^^^
+29 |     if not settings.cache_enabled:
+30 |         logger.info("Caching is disabled in settings")
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/services/cache_service.py:32:1
+   |
+30 |         logger.info("Caching is disabled in settings")
+31 |         return
+32 |     
+   | ^^^^
+33 |     try:
+34 |         # Configure SSL for Heroku Redis (uses self-signed certs)
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/services/cache_service.py:39:1
+   |
+37 |             ssl_params['ssl_cert_reqs'] = ssl.CERT_NONE
+38 |             ssl_params['ssl_check_hostname'] = False
+39 |         
+   | ^^^^^^^^
+40 |         _redis_client = redis.from_url(
+41 |             settings.redis_url,
+   |
+help: Remove whitespace from blank line
+
+F541 [*] f-string without any placeholders
+  --> app/services/cache_service.py:51:21
+   |
+49 |         # Test connection
+50 |         _redis_client.ping()
+51 |         logger.info(f"Redis client initialized successfully")
+   |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+52 |     except RedisError as e:
+53 |         logger.error(f"Failed to initialize Redis client: {e}")
+   |
+help: Remove extraneous `f` prefix
+
+W293 [*] Blank line contains whitespace
+  --> app/services/cache_service.py:61:1
+   |
+59 |     """Close the Redis client connection."""
+60 |     global _redis_client
+61 |     
+   | ^^^^
+62 |     if _redis_client is not None:
+63 |         try:
+   |
+help: Remove whitespace from blank line
+
+W293 Blank line contains whitespace
+  --> app/services/cache_service.py:79:1
+   |
+77 | def _generate_cache_key(prefix: str, *args: Any) -> str:
+78 |     """Generate a cache key from prefix and arguments.
+79 |     
+   | ^^^^
+80 |     Args:
+81 |         prefix: Key prefix (e.g., 'verse', 'question', 'search')
+   |
+help: Remove whitespace from blank line
+
+W293 Blank line contains whitespace
+  --> app/services/cache_service.py:83:1
+   |
+81 |         prefix: Key prefix (e.g., 'verse', 'question', 'search')
+82 |         *args: Values to include in the key
+83 |         
+   | ^^^^^^^^
+84 |     Returns:
+85 |         Cache key string
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/services/cache_service.py:96:1
+   |
+94 |         else:
+95 |             normalized.append(str(arg))
+96 |     
+   | ^^^^
+97 |     # Create hash of normalized arguments for consistent key length
+98 |     content = ":".join(normalized)
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/services/cache_service.py:100:1
+    |
+ 98 |     content = ":".join(normalized)
+ 99 |     content_hash = hashlib.sha256(content.encode()).hexdigest()[:16]
+100 |     
+    | ^^^^
+101 |     return f"{prefix}:{content_hash}"
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/services/cache_service.py:106:1
+    |
+104 | class CacheService:
+105 |     """Service for caching Bible verses, questions, and search results."""
+106 |     
+    | ^^^^
+107 |     @staticmethod
+108 |     def get(key: str) -> Optional[Any]:
+    |
+help: Remove whitespace from blank line
+
+W293 Blank line contains whitespace
+   --> app/services/cache_service.py:110:1
+    |
+108 |     def get(key: str) -> Optional[Any]:
+109 |         """Get a value from cache.
+110 |         
+    | ^^^^^^^^
+111 |         Args:
+112 |             key: Cache key
+    |
+help: Remove whitespace from blank line
+
+W293 Blank line contains whitespace
+   --> app/services/cache_service.py:113:1
+    |
+111 |         Args:
+112 |             key: Cache key
+113 |             
+    | ^^^^^^^^^^^^
+114 |         Returns:
+115 |             Cached value or None if not found or error
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/services/cache_service.py:120:1
+    |
+118 |         if client is None:
+119 |             return None
+120 |         
+    | ^^^^^^^^
+121 |         try:
+122 |             value = client.get(key)
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/services/cache_service.py:126:1
+    |
+124 |                 logger.info(f"Cache miss for key: {key[:50]}...")
+125 |                 return None
+126 |             
+    | ^^^^^^^^^^^^
+127 |             logger.info(f"Cache hit for key: {key[:50]}...")
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/services/cache_service.py:128:1
+    |
+127 |             logger.info(f"Cache hit for key: {key[:50]}...")
+128 |             
+    | ^^^^^^^^^^^^
+129 |             # Try to parse as JSON
+130 |             try:
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/services/cache_service.py:134:1
+    |
+132 |             except json.JSONDecodeError:
+133 |                 return value
+134 |                 
+    | ^^^^^^^^^^^^^^^^
+135 |         except RedisError as e:
+136 |             logger.error(f"Cache get error for key {key}: {e}")
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/services/cache_service.py:138:1
+    |
+136 |             logger.error(f"Cache get error for key {key}: {e}")
+137 |             return None
+138 |     
+    | ^^^^
+139 |     @staticmethod
+140 |     def set(key: str, value: Any, ttl: int = 0) -> bool:
+    |
+help: Remove whitespace from blank line
+
+W293 Blank line contains whitespace
+   --> app/services/cache_service.py:142:1
+    |
+140 |     def set(key: str, value: Any, ttl: int = 0) -> bool:
+141 |         """Set a value in cache.
+142 |         
+    | ^^^^^^^^
+143 |         Args:
+144 |             key: Cache key
+    |
+help: Remove whitespace from blank line
+
+W293 Blank line contains whitespace
+   --> app/services/cache_service.py:147:1
+    |
+145 |             value: Value to cache
+146 |             ttl: Time to live in seconds (0 = no expiry)
+147 |             
+    | ^^^^^^^^^^^^
+148 |         Returns:
+149 |             True if successful, False otherwise
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/services/cache_service.py:154:1
+    |
+152 |         if client is None:
+153 |             return False
+154 |         
+    | ^^^^^^^^
+155 |         try:
+156 |             # Serialize value as JSON
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/services/cache_service.py:161:1
+    |
+159 |             else:
+160 |                 serialized = str(value)
+161 |             
+    | ^^^^^^^^^^^^
+162 |             if ttl > 0:
+163 |                 client.setex(key, ttl, serialized)
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/services/cache_service.py:166:1
+    |
+164 |             else:
+165 |                 client.set(key, serialized)
+166 |             
+    | ^^^^^^^^^^^^
+167 |             return True
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/services/cache_service.py:168:1
+    |
+167 |             return True
+168 |             
+    | ^^^^^^^^^^^^
+169 |         except RedisError as e:
+170 |             logger.error(f"Cache set error for key {key}: {e}")
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/services/cache_service.py:172:1
+    |
+170 |             logger.error(f"Cache set error for key {key}: {e}")
+171 |             return False
+172 |     
+    | ^^^^
+173 |     @staticmethod
+174 |     def delete(key: str) -> bool:
+    |
+help: Remove whitespace from blank line
+
+W293 Blank line contains whitespace
+   --> app/services/cache_service.py:176:1
+    |
+174 |     def delete(key: str) -> bool:
+175 |         """Delete a key from cache.
+176 |         
+    | ^^^^^^^^
+177 |         Args:
+178 |             key: Cache key
+    |
+help: Remove whitespace from blank line
+
+W293 Blank line contains whitespace
+   --> app/services/cache_service.py:179:1
+    |
+177 |         Args:
+178 |             key: Cache key
+179 |             
+    | ^^^^^^^^^^^^
+180 |         Returns:
+181 |             True if successful, False otherwise
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/services/cache_service.py:186:1
+    |
+184 |         if client is None:
+185 |             return False
+186 |         
+    | ^^^^^^^^
+187 |         try:
+188 |             client.delete(key)
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/services/cache_service.py:193:1
+    |
+191 |             logger.error(f"Cache delete error for key {key}: {e}")
+192 |             return False
+193 |     
+    | ^^^^
+194 |     @staticmethod
+195 |     def clear_pattern(pattern: str) -> int:
+    |
+help: Remove whitespace from blank line
+
+W293 Blank line contains whitespace
+   --> app/services/cache_service.py:197:1
+    |
+195 |     def clear_pattern(pattern: str) -> int:
+196 |         """Clear all keys matching a pattern.
+197 |         
+    | ^^^^^^^^
+198 |         Args:
+199 |             pattern: Key pattern (e.g., 'question:*')
+    |
+help: Remove whitespace from blank line
+
+W293 Blank line contains whitespace
+   --> app/services/cache_service.py:200:1
+    |
+198 |         Args:
+199 |             pattern: Key pattern (e.g., 'question:*')
+200 |             
+    | ^^^^^^^^^^^^
+201 |         Returns:
+202 |             Number of keys deleted
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/services/cache_service.py:207:1
+    |
+205 |         if client is None:
+206 |             return 0
+207 |         
+    | ^^^^^^^^
+208 |         try:
+209 |             keys = client.keys(pattern)
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/services/cache_service.py:216:1
+    |
+214 |             logger.error(f"Cache clear pattern error for {pattern}: {e}")
+215 |             return 0
+216 |     
+    | ^^^^
+217 |     # Convenience methods for specific cache types
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/services/cache_service.py:218:1
+    |
+217 |     # Convenience methods for specific cache types
+218 |     
+    | ^^^^
+219 |     @staticmethod
+220 |     def get_verse(reference: str) -> Optional[dict]:
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/services/cache_service.py:224:1
+    |
+222 |         key = _generate_cache_key("verse", reference)
+223 |         return CacheService.get(key)
+224 |     
+    | ^^^^
+225 |     @staticmethod
+226 |     def set_verse(reference: str, verse_data: dict) -> bool:
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/services/cache_service.py:231:1
+    |
+229 |         key = _generate_cache_key("verse", reference)
+230 |         return CacheService.set(key, verse_data, ttl=settings.cache_ttl_verses)
+231 |     
+    | ^^^^
+232 |     @staticmethod
+233 |     def get_passage(book: str, chapter: int, start_verse: int, end_verse: int) -> Optional[list]:
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/services/cache_service.py:237:1
+    |
+235 |         key = _generate_cache_key("passage", book, chapter, start_verse, end_verse)
+236 |         return CacheService.get(key)
+237 |     
+    | ^^^^
+238 |     @staticmethod
+239 |     def set_passage(book: str, chapter: int, start_verse: int, end_verse: int, passage_data: list) -> bool:
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/services/cache_service.py:244:1
+    |
+242 |         key = _generate_cache_key("passage", book, chapter, start_verse, end_verse)
+243 |         return CacheService.set(key, passage_data, ttl=settings.cache_ttl_verses)
+244 |     
+    | ^^^^
+245 |     @staticmethod
+246 |     def get_chapter(book: str, chapter: int) -> Optional[dict]:
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/services/cache_service.py:250:1
+    |
+248 |         key = _generate_cache_key("chapter", book, chapter)
+249 |         return CacheService.get(key)
+250 |     
+    | ^^^^
+251 |     @staticmethod
+252 |     def set_chapter(book: str, chapter: int, chapter_data: dict) -> bool:
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/services/cache_service.py:257:1
+    |
+255 |         key = _generate_cache_key("chapter", book, chapter)
+256 |         return CacheService.set(key, chapter_data, ttl=settings.cache_ttl_verses)
+257 |     
+    | ^^^^
+258 |     @staticmethod
+259 |     def get_search(keyword: str, limit: int) -> Optional[list]:
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/services/cache_service.py:263:1
+    |
+261 |         key = _generate_cache_key("search", keyword, limit)
+262 |         return CacheService.get(key)
+263 |     
+    | ^^^^
+264 |     @staticmethod
+265 |     def set_search(keyword: str, limit: int, results: list) -> bool:
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/services/cache_service.py:270:1
+    |
+268 |         key = _generate_cache_key("search", keyword, limit)
+269 |         return CacheService.set(key, results, ttl=settings.cache_ttl_searches)
+270 |     
+    | ^^^^
+271 |     @staticmethod
+272 |     def get_question(question: str, conversation_history: Optional[list] = None) -> Optional[str]:
+    |
+help: Remove whitespace from blank line
+
+W293 Blank line contains whitespace
+   --> app/services/cache_service.py:274:1
+    |
+272 |     def get_question(question: str, conversation_history: Optional[list] = None) -> Optional[str]:
+273 |         """Get cached answer for a question.
+274 |         
+    | ^^^^^^^^
+275 |         Args:
+276 |             question: The question text
+    |
+help: Remove whitespace from blank line
+
+W293 Blank line contains whitespace
+   --> app/services/cache_service.py:278:1
+    |
+276 |             question: The question text
+277 |             conversation_history: Optional conversation context
+278 |             
+    | ^^^^^^^^^^^^
+279 |         Returns:
+280 |             Cached answer or None
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/services/cache_service.py:288:1
+    |
+286 |         logger.info(f"Question cache result: {'HIT' if result else 'MISS'}")
+287 |         return result
+288 |     
+    | ^^^^
+289 |     @staticmethod
+290 |     def set_question(question: str, answer: str, conversation_history: Optional[list] = None) -> bool:
+    |
+help: Remove whitespace from blank line
+
+W293 Blank line contains whitespace
+   --> app/services/cache_service.py:292:1
+    |
+290 |     def set_question(question: str, answer: str, conversation_history: Optional[list] = None) -> bool:
+291 |         """Cache an answer for a question (24 hour TTL).
+292 |         
+    | ^^^^^^^^
+293 |         Args:
+294 |             question: The question text
+    |
+help: Remove whitespace from blank line
+
+W293 Blank line contains whitespace
+   --> app/services/cache_service.py:297:1
+    |
+295 |             answer: The answer to cache
+296 |             conversation_history: Optional conversation context
+297 |             
+    | ^^^^^^^^^^^^
+298 |         Returns:
+299 |             True if cached successfully
+    |
+help: Remove whitespace from blank line
+
+I001 [*] Import block is un-sorted or un-formatted
+ --> app/services/geolocation_service.py:2:1
+  |
+1 |   """Service for IP geolocation lookup."""
+2 | / import logging
+3 | | import httpx
+4 | | import ipaddress
+5 | | from typing import Optional, Dict
+  | |_________________________________^
+6 |
+7 |   logger = logging.getLogger(__name__)
+  |
+help: Organize imports
+
+W293 [*] Blank line contains whitespace
+  --> app/services/geolocation_service.py:12:1
+   |
+10 | class GeolocationService:
+11 |     """Service to get geolocation data from IP addresses."""
+12 |     
+   | ^^^^
+13 |     # Using ip-api.com (free, no API key required, 45 requests/minute)
+14 |     # Alternative: ipapi.co (1000 requests/day free)
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/services/geolocation_service.py:16:1
+   |
+14 |     # Alternative: ipapi.co (1000 requests/day free)
+15 |     BASE_URL = "http://ip-api.com/json"
+16 |     
+   | ^^^^
+17 |     @staticmethod
+18 |     async def lookup_ip(ip_address: str) -> Optional[Dict[str, str]]:
+   |
+help: Remove whitespace from blank line
+
+W293 Blank line contains whitespace
+  --> app/services/geolocation_service.py:21:1
+   |
+19 |         """
+20 |         Lookup geolocation information for an IP address.
+21 |         
+   | ^^^^^^^^
+22 |         Args:
+23 |             ip_address: The IP address to lookup
+   |
+help: Remove whitespace from blank line
+
+W293 Blank line contains whitespace
+  --> app/services/geolocation_service.py:24:1
+   |
+22 |         Args:
+23 |             ip_address: The IP address to lookup
+24 |             
+   | ^^^^^^^^^^^^
+25 |         Returns:
+26 |             Dictionary with geolocation data or None if lookup fails
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/services/geolocation_service.py:37:1
+   |
+35 |             # Skip private/local IPs
+36 |             return None
+37 |         
+   | ^^^^^^^^
+38 |         try:
+39 |             # Add fields parameter to get only what we need
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/services/geolocation_service.py:41:1
+   |
+39 |             # Add fields parameter to get only what we need
+40 |             url = f"{GeolocationService.BASE_URL}/{ip_address}?fields=status,country,countryCode,region,city"
+41 |             
+   | ^^^^^^^^^^^^
+42 |             async with httpx.AsyncClient(timeout=3.0) as client:
+43 |                 response = await client.get(url)
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/services/geolocation_service.py:44:1
+   |
+42 |             async with httpx.AsyncClient(timeout=3.0) as client:
+43 |                 response = await client.get(url)
+44 |                 
+   | ^^^^^^^^^^^^^^^^
+45 |                 if response.status_code == 200:
+46 |                     data = response.json()
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/services/geolocation_service.py:47:1
+   |
+45 |                 if response.status_code == 200:
+46 |                     data = response.json()
+47 |                     
+   | ^^^^^^^^^^^^^^^^^^^^
+48 |                     if data.get('status') == 'success':
+49 |                         return {
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/services/geolocation_service.py:61:1
+   |
+59 |                     logger.warning(f"Geolocation API returned status {response.status_code}")
+60 |                     return None
+61 |                     
+   | ^^^^^^^^^^^^^^^^^^^^
+62 |         except httpx.TimeoutException:
+63 |             logger.warning(f"Geolocation lookup timeout for {ip_address}")
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/services/geolocation_service.py:68:1
+   |
+66 |             logger.error(f"Error during geolocation lookup for {ip_address}: {e}")
+67 |             return None
+68 |     
+   | ^^^^
+69 |     @staticmethod
+70 |     def lookup_ip_sync(ip_address: str) -> Optional[Dict[str, str]]:
+   |
+help: Remove whitespace from blank line
+
+W293 Blank line contains whitespace
+  --> app/services/geolocation_service.py:73:1
+   |
+71 |         """
+72 |         Synchronous version of lookup_ip for use in non-async contexts.
+73 |         
+   | ^^^^^^^^
+74 |         Args:
+75 |             ip_address: The IP address to lookup
+   |
+help: Remove whitespace from blank line
+
+W293 Blank line contains whitespace
+  --> app/services/geolocation_service.py:76:1
+   |
+74 |         Args:
+75 |             ip_address: The IP address to lookup
+76 |             
+   | ^^^^^^^^^^^^
+77 |         Returns:
+78 |             Dictionary with geolocation data or None if lookup fails
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/services/geolocation_service.py:83:1
+   |
+81 |             # Skip private/local IPs
+82 |             return None
+83 |         
+   | ^^^^^^^^
+84 |         try:
+85 |             url = f"{GeolocationService.BASE_URL}/{ip_address}?fields=status,country,countryCode,region,city"
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/services/geolocation_service.py:86:1
+   |
+84 |         try:
+85 |             url = f"{GeolocationService.BASE_URL}/{ip_address}?fields=status,country,countryCode,region,city"
+86 |             
+   | ^^^^^^^^^^^^
+87 |             with httpx.Client(timeout=3.0) as client:
+88 |                 response = client.get(url)
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/services/geolocation_service.py:89:1
+   |
+87 |             with httpx.Client(timeout=3.0) as client:
+88 |                 response = client.get(url)
+89 |                 
+   | ^^^^^^^^^^^^^^^^
+90 |                 if response.status_code == 200:
+91 |                     data = response.json()
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/services/geolocation_service.py:92:1
+   |
+90 |                 if response.status_code == 200:
+91 |                     data = response.json()
+92 |                     
+   | ^^^^^^^^^^^^^^^^^^^^
+93 |                     if data.get('status') == 'success':
+94 |                         return {
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/services/geolocation_service.py:106:1
+    |
+104 |                     logger.warning(f"Geolocation API returned status {response.status_code}")
+105 |                     return None
+106 |                     
+    | ^^^^^^^^^^^^^^^^^^^^
+107 |         except httpx.TimeoutException:
+108 |             logger.warning(f"Geolocation lookup timeout for {ip_address}")
+    |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+   --> app/services/geolocation_service.py:113:1
+    |
+111 |             logger.error(f"Error during geolocation lookup for {ip_address}: {e}")
+112 |             return None
+113 |     
+    | ^^^^
+114 |     @staticmethod
+115 |     def _is_private_ip(ip_address: str) -> bool:
+    |
+help: Remove whitespace from blank line
+
+F401 [*] `json` imported but unused
+ --> app/services/mcp_integration.py:4:8
+  |
+2 | from __future__ import annotations
+3 |
+4 | import json
+  |        ^^^^
+5 | import logging
+6 | from typing import Any, Dict, List
+  |
+help: Remove unused import: `json`
+
+W293 Blank line contains whitespace
+  --> app/services/mcp_integration.py:16:1
+   |
+14 | def get_bible_tools_for_openai() -> List[Dict[str, Any]]:
+15 |     """Convert MCP Bible tool schemas to OpenAI function calling format.
+16 |     
+   | ^^^^
+17 |     Returns:
+18 |         List of tool definitions in OpenAI's function calling format.
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/services/mcp_integration.py:22:1
+   |
+20 |     mcp_tools = list_tools()
+21 |     openai_tools = []
+22 |     
+   | ^^^^
+23 |     # Only include Bible retrieval tools for now
+24 |     bible_tool_names = {"get_verse", "get_passage", "get_chapter", "search_verses"}
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/services/mcp_integration.py:25:1
+   |
+23 |     # Only include Bible retrieval tools for now
+24 |     bible_tool_names = {"get_verse", "get_passage", "get_chapter", "search_verses"}
+25 |     
+   | ^^^^
+26 |     for mcp_tool in mcp_tools:
+27 |         if mcp_tool.name not in bible_tool_names:
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/services/mcp_integration.py:29:1
+   |
+27 |         if mcp_tool.name not in bible_tool_names:
+28 |             continue
+29 |             
+   | ^^^^^^^^^^^^
+30 |         openai_tool = {
+31 |             "type": "function",
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/services/mcp_integration.py:39:1
+   |
+37 |         }
+38 |         openai_tools.append(openai_tool)
+39 |     
+   | ^^^^
+40 |     return openai_tools
+   |
+help: Remove whitespace from blank line
+
+W293 Blank line contains whitespace
+  --> app/services/mcp_integration.py:45:1
+   |
+43 | def execute_mcp_tool(tool_name: str, arguments: Dict[str, Any], user: Dict[str, Any] | None = None) -> Dict[str, Any]:
+44 |     """Execute an MCP tool and return the result.
+45 |     
+   | ^^^^
+46 |     Args:
+47 |         tool_name: Name of the MCP tool to execute
+   |
+help: Remove whitespace from blank line
+
+W293 Blank line contains whitespace
+  --> app/services/mcp_integration.py:50:1
+   |
+48 |         arguments: Arguments to pass to the tool
+49 |         user: Optional user context for authentication
+50 |         
+   | ^^^^^^^^
+51 |     Returns:
+52 |         Dictionary containing the tool result
+   |
+help: Remove whitespace from blank line
+
+W293 Blank line contains whitespace
+  --> app/services/mcp_integration.py:53:1
+   |
+51 |     Returns:
+52 |         Dictionary containing the tool result
+53 |         
+   | ^^^^^^^^
+54 |     Raises:
+55 |         ValueError: If the tool doesn't exist or execution fails
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/services/mcp_integration.py:60:1
+   |
+58 |     if not tool_def:
+59 |         raise ValueError(f"Tool '{tool_name}' not found")
+60 |     
+   | ^^^^
+61 |     try:
+62 |         context = MCPContext(user=user)
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/services/mcp_integration.py:64:1
+   |
+62 |         context = MCPContext(user=user)
+63 |         result = tool_def.handler(arguments, context)
+64 |         
+   | ^^^^^^^^
+65 |         # Ensure result is JSON serializable
+66 |         if isinstance(result, dict):
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/services/mcp_integration.py:72:1
+   |
+70 |         else:
+71 |             return {"result": str(result)}
+72 |             
+   | ^^^^^^^^^^^^
+73 |     except Exception as e:
+74 |         logger.error(f"Error executing MCP tool '{tool_name}': {e}")
+   |
+help: Remove whitespace from blank line
+
+I001 [*] Import block is un-sorted or un-formatted
+  --> app/services/openai_service.py:2:1
+   |
+ 1 |   """OpenAI service for handling AI completions."""
+ 2 | / from __future__ import annotations
+ 3 | |
+ 4 | | import asyncio
+ 5 | | import json
+ 6 | | import logging
+ 7 | | import re
+ 8 | | from typing import Any, Dict, Iterable, List, Optional
+ 9 | |
+10 | | from openai import (
+11 | |     APIConnectionError,
+12 | |     APIError,
+13 | |     APITimeoutError,
+14 | |     BadRequestError,
+15 | |     OpenAI,
+16 | |     RateLimitError,
+17 | | )
+18 | |
+19 | | from app.utils.exceptions import OpenAIError
+20 | | from app.services.mcp_integration import execute_mcp_tool, get_bible_tools_for_openai
+21 | | from app.database import ApiRequestLogRepository, OpenAIApiCallRepository
+   | |_________________________________________________________________________^
+22 |
+23 |   logger = logging.getLogger(__name__)
+   |
+help: Organize imports
+
+F401 [*] `re` imported but unused
+ --> app/services/openai_service.py:7:8
+  |
+5 | import json
+6 | import logging
+7 | import re
+  |        ^^
+8 | from typing import Any, Dict, Iterable, List, Optional
+  |
+help: Remove unused import: `re`
+
+W293 [*] Blank line contains whitespace
+  --> app/services/openai_service.py:69:1
+   |
+67 |     ) -> str:
+68 |         """Get an AI-generated answer to a Bible-related question using Chat Completions with function calling."""
+69 |         
+   | ^^^^^^^^
+70 |         # Build message list for Chat Completions API
+71 |         messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+   |
+help: Remove whitespace from blank line
+
+W293 [*] Blank line contains whitespace
+  --> app/services/openai_service.py:72:1
+   |
+70 |         # Build message list for Chat Completions API
+71 |         messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+72 |         
+0s
+0s
+0s
+0s
+0s
+0s
