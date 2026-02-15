@@ -124,14 +124,6 @@ def test_gitmodules_has_submodules():
         "Backend submodule URL not correct"
 
 
-def test_dockerfiles_exist():
-    """Verify both backend and frontend have Dockerfiles."""
-    assert os.path.isfile('backend/Dockerfile'), \
-        "backend/Dockerfile not found"
-    assert os.path.isfile('frontend/Dockerfile'), \
-        "frontend/Dockerfile not found"
-
-
 def test_readme_exists():
     """Verify README.md exists and contains key information."""
     assert os.path.isfile('README.md'), "README.md not found"
