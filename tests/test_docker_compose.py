@@ -124,11 +124,15 @@ def test_redis_health_check(docker_compose_up):
 @pytest.mark.integration
 def test_backend_responds(docker_compose_up, http_session):
     """Test that backend service responds to HTTP requests."""
-    # Try health endpoint
+    # Try health endpoint (root path)
     try:
-        response = http_session.get('http://localhost:8000/health', timeout=10)
+        response = http_session.get('http://localhost:8000/', timeout=10)
         assert response.status_code == 200, \
             f"Backend health check failed with status {response.status_code}"
+        # Verify it returns expected health check data
+        data = response.json()
+        assert 'status' in data, "Health check should return status field"
+        assert data['status'] == 'healthy', "Backend should report healthy status"
     except requests.exceptions.ConnectionError:
         pytest.fail("Cannot connect to backend on port 8000")
 
